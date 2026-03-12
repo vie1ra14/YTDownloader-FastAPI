@@ -32,25 +32,22 @@ async def download(background_task: BackgroundTasks,
     path = temp.name
     finalpath = path + '.mp3'
     ydl_opts = {
-        "format": "bestaudio/best",
+        "format": "bestaudio[ext=m4a]/bestaudio/best",
         "outtmpl": path + ".%(ext)s",
+
+        "cookiefile": "/etc/secrets/cookies.txt",
+
         "quiet": True,
         "no_warnings": True,
         "noplaylist": True,
 
-        "http_headers": {
-            "User-Agent": (
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/120.0.0.0 Safari/537.36"
-            ),
-            "Accept-Language": "en-US,en;q=0.9",
-        },
-
         "extractor_args": {
             "youtube": {
-                "player_client": ["android"],
-                "player_skip": ["webpage", "configs"],
+                "player_client": [
+                    "android",
+                    "android_music",
+                    "tv_embedded"
+                ]
             }
         },
 
