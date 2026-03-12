@@ -1,5 +1,6 @@
 # type: ignore
 import tempfile
+import shutil
 import os
 from fastapi import FastAPI, Depends
 from fastapi.responses import FileResponse
@@ -21,6 +22,11 @@ app.add_middleware(
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_DIR = os.path.join(BASE_DIR, "static")
+SECRET_COOKIE_PATH = "/etc/secrets/cookies.txt"
+COOKIE_PATH = "/tmp/cookies.txt"
+
+if os.path.exists(SECRET_COOKIE_PATH):
+    shutil.copy(SECRET_COOKIE_PATH, COOKIE_PATH)
 
 
 @app.get('/download')
@@ -35,7 +41,7 @@ async def download(background_task: BackgroundTasks,
         "format": "bestaudio[ext=m4a]/bestaudio/best",
         "outtmpl": path + ".%(ext)s",
 
-        "cookiefile": "/etc/secrets/cookies.txt",
+        "cookiefile": "/tmp/cookies.txt",
 
         "quiet": True,
         "no_warnings": True,
