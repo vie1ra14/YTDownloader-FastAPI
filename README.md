@@ -44,4 +44,7 @@ You can also test the API directly through the FastAPI Swagger UI.
 
 <br>
 
+**Disclaimer**: Many serverless hosts and VPS IP ranges are flagged or throttled by YouTube. If you encounter 403 Forbidden or 429 Too Many Requests errors, please consider routing your requests through a **Residential Proxy** or hosting the application on a server with a **clean IP**.
+
+
 Developed by **vie1ra14**.
