@@ -2,7 +2,7 @@
 import tempfile
 import shutil
 import os
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.background import BackgroundTasks
@@ -24,8 +24,14 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 SECRET_COOKIE_PATH = "/etc/secrets/cookies.txt"
 COOKIE_PATH = "/tmp/cookies.txt"
+CLIENTS = [
+    "android",
+    "android_music",
+    "tv_embedded",
+    "web",
+]
 
-if os.path.exists(SECRET_COOKIE_PATH):
+if os.path.exists(SECRET_COOKIE_PATH) and not os.path.exists(COOKIE_PATH):
     shutil.copy(SECRET_COOKIE_PATH, COOKIE_PATH)
 
 
@@ -37,44 +43,54 @@ async def download(background_task: BackgroundTasks,
     temp.close()
     path = temp.name
     finalpath = path + '.mp3'
-    ydl_opts = {
-        "format": "bestaudio[ext=m4a]/bestaudio/best",
-        "outtmpl": path + ".%(ext)s",
+    for client in CLIENTS:
+        try:
+            ydl_opts = {
+                "format": "bestaudio[ext=m4a]/bestaudio/best",
+                "outtmpl": path + ".%(ext)s",
+                "cookiefile": "/tmp/cookies.txt",
+                "quiet": True,
+                "no_warnings": True,
+                "noplaylist": True,
 
-        "cookiefile": "/tmp/cookies.txt",
+                "retries": 3,
+                "fragment_retries": 3,
 
-        "quiet": True,
-        "no_warnings": True,
-        "noplaylist": True,
+                "http_headers": {
+                    "User-Agent": (
+                        "com.google.android.youtube/19.09.37 "
+                        "(Linux; U; Android 11) gzip"
+                    )
+                },
 
-        "extractor_args": {
-            "youtube": {
-                "player_client": [
-                    "android",
-                    "android_music",
-                    "tv_embedded"
-                ]
+                "extractor_args": {
+                    "youtube": {
+                        "player_client": [client]
+                    }
+                },
+
+                "postprocessors": [{
+                    "key": "FFmpegExtractAudio",
+                    "preferredcodec": "mp3",
+                    "preferredquality": "192",
+                }],
             }
-        },
 
-        "postprocessors": [{
-            "key": "FFmpegExtractAudio",
-            "preferredcodec": "mp3",
-            "preferredquality": "192",
-        }],
-    }
+            with yt_dlp.YoutubeDL(ydl_opts) as ytdl:
+                info = ytdl.extract_info(url, download=True)
+                title = info.get('title')
 
-    with yt_dlp.YoutubeDL(ydl_opts) as ytdl:
-        info = ytdl.extract_info(url)
-        title = info.get('title')
-        ytdl.download([url])
+            background_task.add_task(remove_file, finalpath)
 
-    background_task.add_task(remove_file, finalpath)
+            return FileResponse(
+                finalpath,
+                media_type="audio/mpeg",
+                filename=f"{title}.mp3",
+            )
 
-    return FileResponse(
-        finalpath,
-        media_type="audio/mpeg",
-        filename=f"{title}.mp3",
-    )
+        except Exception as e:
+            print(f'Client {client} failed:', e)
+    raise HTTPException(status_code=500, detail='All Youtube clients failed.')
+
 
 app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
