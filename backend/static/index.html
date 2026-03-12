@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+<title>YT Downloader</title>
+</head>
+<body>
+
+<form id="downloadForm">
+    <input type="url" id="downloadLink" placeholder="YouTube URL" required>
+    <button type="submit">Start Download</button>
+</form>
+
+<script>
+const form = document.getElementById('downloadForm');
+
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const link = document.getElementById('downloadLink').value;
+    const url = `/download?url=${encodeURIComponent(link)}`;
+
+    try {
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            const data = await response.json();
+            alert(data.detail);
+            return;
+        }
+
+        alert('Downloading')
+        window.location.href = url;
+
+    } catch (err) {
+        console.error(err);
+        alert("Failed to connect to server.");
+    }
+});
+</script>
+
+</body>
+</html>
