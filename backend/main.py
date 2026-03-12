@@ -34,15 +34,33 @@ async def download(background_task: BackgroundTasks,
     ydl_opts = {
         "format": "bestaudio/best",
         "outtmpl": path + ".%(ext)s",
+        "quiet": True,
+        "no_warnings": True,
+        "noplaylist": True,
+
+        "http_headers": {
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/120.0.0.0 Safari/537.36"
+            ),
+            "Accept-Language": "en-US,en;q=0.9",
+        },
+
+        "extractor_args": {
+            "youtube": {
+                "player_client": ["android"],
+                "player_skip": ["webpage", "configs"],
+            }
+        },
+
         "postprocessors": [{
             "key": "FFmpegExtractAudio",
             "preferredcodec": "mp3",
             "preferredquality": "192",
         }],
-        'quiet': True,
-        'no_warnings': True,
-        'noplaylist': True,
     }
+
     with yt_dlp.YoutubeDL(ydl_opts) as ytdl:
         info = ytdl.extract_info(url)
         title = info.get('title')
