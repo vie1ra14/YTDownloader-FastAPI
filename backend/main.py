@@ -27,6 +27,7 @@ COOKIE_PATH = "/tmp/cookies.txt"
 CLIENTS = [
     "android",
     "android_music",
+    "ios",
     "tv_embedded",
     "web",
 ]
@@ -55,11 +56,14 @@ async def download(background_task: BackgroundTasks,
 
                 "retries": 3,
                 "fragment_retries": 3,
+                "sleep_interval": 1,
+                "max_sleep_interval": 3,
 
                 "http_headers": {
                     "User-Agent": (
-                        "com.google.android.youtube/19.09.37 "
-                        "(Linux; U; Android 11) gzip"
+                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                        "AppleWebKit/537.36 (KHTML, like Gecko) "
+                        "Chrome/122.0.0.0 Safari/537.36"
                     )
                 },
 
