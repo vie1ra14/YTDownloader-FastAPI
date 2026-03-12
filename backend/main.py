@@ -11,11 +11,6 @@ import yt_dlp
 
 app = FastAPI()
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-STATIC_DIR = os.path.join(BASE_DIR, "static")
-
-app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["https://yt-downloader-fast-api.onrender.com"],
@@ -23,6 +18,9 @@ app.add_middleware(
     allow_methods=["GET"],
     allow_headers=["*"],
 )
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+STATIC_DIR = os.path.join(BASE_DIR, "static")
 
 
 @app.get('/download')
@@ -57,3 +55,5 @@ async def download(background_task: BackgroundTasks,
         media_type="audio/mpeg",
         filename=f"{title}.mp3",
     )
+
+app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
