@@ -14,7 +14,7 @@ app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://yt-downloader-fast-api.onrender.com"],
     allow_credentials=True,
     allow_methods=["GET"],
     allow_headers=["*"],
