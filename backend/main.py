@@ -1,5 +1,6 @@
 # type: ignore
 import tempfile
+import os
 from fastapi import FastAPI, Depends
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -10,7 +11,10 @@ import yt_dlp
 
 app = FastAPI()
 
-app.mount("/", StaticFiles(directory="static", html=True), name="static")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+STATIC_DIR = os.path.join(BASE_DIR, "backend", "static")
+
+app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
 
 app.add_middleware(
     CORSMiddleware,
